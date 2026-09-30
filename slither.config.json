@@ -1,0 +1,8 @@
+{
+  "filter_paths": "lib|test",
+  "solc_remaps": [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "forge-std/=lib/forge-std/src/"
+  ],
+  "solc_arguments": "--optimize --optimize-runs 200"
+}
