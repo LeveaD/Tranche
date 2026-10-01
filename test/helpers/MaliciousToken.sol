@@ -66,16 +66,20 @@ contract MaliciousToken is ERC20 {
     // ERC-20 override
     // ─────────────────────────────────────────────────────────────────────────
 
-    /// @dev Fires the re-entrancy hook (if active) before every transfer.
-    ///      The outer call is expected to revert because ReentrancyGuard blocks
-    ///      the nested call; the hook's return value is intentionally ignored.
+    /// @dev Fires the re-entrancy hook (if active) before every non-mint transfer
+    ///      and propagates any revert from the inner call.  The expected behaviour
+    ///      is that the vault's nonReentrant guard fires (ReentrancyGuardReentrantCall),
+    ///      that error is re-raised here, and the outer vault call also reverts.
     function _update(address from, address to, uint256 value) internal override {
         if (hookActive && from != address(0)) {
-            // Attempt re-entrancy; result is intentionally ignored — the test
-            // asserts that the outer call reverts via ReentrancyGuard.
-            (bool _success, bytes memory _retdata) =
+            (bool _ok, bytes memory _ret) =
                 hookTarget.call(hookCalldata); // solhint-disable-line avoid-low-level-calls
-            (_success, _retdata); // silence solc-9302: return values intentionally unused
+            if (!_ok) {
+                // Propagate the inner revert so the outer call reverts too.
+                assembly {
+                    revert(add(_ret, 0x20), mload(_ret))
+                }
+            }
         }
         super._update(from, to, value);
     }
