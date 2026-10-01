@@ -90,6 +90,7 @@ contract TrancheVault is ITrancheVault, ReentrancyGuard {
         if (recipient == address(0)) revert ZeroAddress();
         if (target == address(0)) revert ZeroAddress();
         if (amount == 0) revert ZeroAmount();
+        // forge-lint: disable-next-line(block-timestamp) -- deadline comparison is intentional; see spec
         if (deadline <= block.timestamp) revert DeadlineNotFuture();
         if (expectedCodeHash == bytes32(0)) revert ZeroCodeHash();
         if (expectedCodeHash == EMPTY_CODEHASH) revert ForbiddenCodeHash();
@@ -134,6 +135,7 @@ contract TrancheVault is ITrancheVault, ReentrancyGuard {
 
         // ── Checks ───────────────────────────────────────────────────────────
         if (t.status != Status.Active) revert NotActive();
+        // forge-lint: disable-next-line(block-timestamp) -- deadline comparison is intentional; see spec
         if (block.timestamp > t.deadline) revert DeadlinePassed();
         if (t.target.codehash != t.expectedCodeHash) revert BytecodeMismatch();
 
@@ -158,6 +160,7 @@ contract TrancheVault is ITrancheVault, ReentrancyGuard {
 
         // ── Checks ───────────────────────────────────────────────────────────
         if (t.status != Status.Active) revert NotActive();
+        // forge-lint: disable-next-line(block-timestamp) -- deadline comparison is intentional; see spec
         if (block.timestamp <= t.deadline) revert DeadlineNotPassed();
 
         // ── Effects ──────────────────────────────────────────────────────────
