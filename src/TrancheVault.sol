@@ -220,4 +220,33 @@ contract TrancheVault is ITrancheVault, ReentrancyGuard {
         t.refundTo = addr;
         emit RefundToUpdated(id, addr);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // External — read
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// @inheritdoc ITrancheVault
+    function getTranche(uint256 id) external view returns (Tranche memory) {
+        Tranche memory t = tranches[id];
+        if (t.status == Status.None) revert TrancheNotFound();
+        return t;
+    }
+
+    /// @inheritdoc ITrancheVault
+    function isClaimable(uint256 id) external view returns (bool) {
+        Tranche memory t = tranches[id];
+        if (t.status != Status.Active) return false;
+        // forge-lint: disable-next-line(block-timestamp) -- deadline comparison is intentional; see spec
+        if (block.timestamp > t.deadline) return false;
+        return t.target.codehash == t.expectedCodeHash;
+    }
+
+    /// @inheritdoc ITrancheVault
+    function isClawbackable(uint256 id) external view returns (bool) {
+        Tranche memory t = tranches[id];
+        if (t.status != Status.Active) return false;
+        // forge-lint: disable-next-line(block-timestamp) -- deadline comparison is intentional; see spec
+        return block.timestamp > t.deadline;
+    }
 }
+

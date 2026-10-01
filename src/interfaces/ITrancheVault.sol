@@ -80,6 +80,10 @@ interface ITrancheVault {
     ///         `expectedCodeHash`.
     error BytecodeMismatch();
 
+    /// @notice `getTranche` called for an ID whose status is None
+    ///         (never created or ID == 0).
+    error TrancheNotFound();
+
     // ─────────────────────────────────────────────────────────────────────────
     // Events
     // ─────────────────────────────────────────────────────────────────────────
@@ -179,4 +183,26 @@ interface ITrancheVault {
     /// @param id   Tranche identifier.
     /// @param addr New refund address; must not be zero.
     function setRefundTo(uint256 id, address addr) external;
+
+    /// @notice Return all stored data for tranche `id`.
+    /// @dev    Reverts with `TrancheNotFound` if `id` has never been created
+    ///         (i.e. status is None).  Use this instead of the public
+    ///         `tranches` mapping when you want the existence check.
+    /// @param id Tranche identifier.
+    /// @return   Full `Tranche` struct copied to memory.
+    function getTranche(uint256 id) external view returns (Tranche memory);
+
+    /// @notice Return true iff the tranche can be claimed right now.
+    /// @dev    Returns false (never reverts) for a nonexistent id.
+    ///         Equivalent to: status == Active
+    ///                     && block.timestamp <= deadline
+    ///                     && target.codehash == expectedCodeHash.
+    /// @param id Tranche identifier.
+    function isClaimable(uint256 id) external view returns (bool);
+
+    /// @notice Return true iff the tranche can be clawed back right now.
+    /// @dev    Returns false (never reverts) for a nonexistent id.
+    ///         Equivalent to: status == Active && block.timestamp > deadline.
+    /// @param id Tranche identifier.
+    function isClawbackable(uint256 id) external view returns (bool);
 }
