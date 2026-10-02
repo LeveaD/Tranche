@@ -493,6 +493,15 @@ contract TrancheVaultTest is Test {
         vault.claim(id);
     }
 
+    /// @dev Covers BRDA:185,14,0: the true branch of `if (t.status != Status.Active)`
+    ///      inside decline — triggered by calling decline on an already-Declined tranche.
+    function test_decline_revert_notActive() public {
+        (uint256 id,) = _defaultSetup();
+        vm.prank(recipient); vault.decline(id); // first decline succeeds
+        vm.expectRevert(ITrancheVault.NotActive.selector);
+        vm.prank(recipient); vault.decline(id); // second hits NotActive
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // GROUP: redirects
     // ─────────────────────────────────────────────────────────────────────────
@@ -777,27 +786,30 @@ contract TrancheVaultTest is Test {
         mal.mint(funder, AMOUNT);
         vm.prank(funder); mal.approve(address(vault), AMOUNT);
 
-        bytes32 outerSalt  = _freshSalt();
+        bytes32 outerSalt   = _freshSalt();
         address outerTarget = _targetForSalt(outerSalt);
-        bytes32 innerSalt  = _freshSalt();
+        bytes32 innerSalt   = _freshSalt();
         address innerTarget = _targetForSalt(innerSalt);
         uint64  dl = _defaultDeadline();
 
-        // Hook: re-enter createTranche during safeTransferFrom
-        mal.setHook(
-            address(vault),
-            abi.encodeCall(vault.createTranche, (address(mal), recipient, AMOUNT, innerTarget, expectedCodeHash, dl))
+        bytes memory hookData = abi.encodeCall(
+            vault.createTranche, (address(mal), recipient, AMOUNT, innerTarget, expectedCodeHash, dl)
         );
+        // Hook: re-enter createTranche during safeTransferFrom
+        mal.setHook(address(vault), hookData);
 
+        // (a) Exact selector; (b) assert the re-entry call was attempted
+        // vm.expectCall tracks infrastructure-level calls, surviving EVM rollback
+        vm.expectCall(address(vault), hookData);
         vm.expectRevert(REENTRANT_SEL);
         vm.prank(funder);
         vault.createTranche(address(mal), recipient, AMOUNT, outerTarget, expectedCodeHash, dl);
 
         // All effects must be rolled back
-        assertEq(vault.nextId(), 1,                                                     "nextId rolled back");
-        assertEq(uint8(_status(1)) , uint8(ITrancheVault.Status.None),    "no tranche stored");
-        assertEq(vault.totalAllocated(address(mal)), 0,                                 "totalAllocated rolled back");
-        assertEq(mal.balanceOf(address(vault)), 0,                                      "vault holds no MAL");
+        assertEq(vault.nextId(), 1,                                                    "nextId rolled back");
+        assertEq(uint8(_status(1)), uint8(ITrancheVault.Status.None),                 "no tranche stored");
+        assertEq(vault.totalAllocated(address(mal)), 0,                                "totalAllocated rolled back");
+        assertEq(mal.balanceOf(address(vault)), 0,                                     "vault holds no MAL");
     }
 
     function test_reentrancy_claim() public {
@@ -812,15 +824,18 @@ contract TrancheVaultTest is Test {
 
         _deploy(salt);
 
+        bytes memory hookData = abi.encodeCall(vault.claim, (id));
         // Arm hook: re-enter claim during safeTransfer to payoutTo
-        mal.setHook(address(vault), abi.encodeCall(vault.claim, (id)));
+        mal.setHook(address(vault), hookData);
 
+        // (a) Exact selector; (b) re-entry attempt was made
+        vm.expectCall(address(vault), hookData);
         vm.expectRevert(REENTRANT_SEL);
         vault.claim(id);
 
-        assertEq(uint8(_status(id)) , uint8(ITrancheVault.Status.Active), "status rolled back");
-        assertEq(mal.balanceOf(address(vault)), AMOUNT,                                 "vault still holds tokens");
-        assertEq(mal.balanceOf(recipient), 0,                                           "recipient got nothing");
+        assertEq(uint8(_status(id)), uint8(ITrancheVault.Status.Active), "status rolled back");
+        assertEq(mal.balanceOf(address(vault)), AMOUNT,                   "vault still holds tokens");
+        assertEq(mal.balanceOf(recipient), 0,                             "recipient got nothing");
     }
 
     function test_reentrancy_clawback() public {
@@ -835,13 +850,16 @@ contract TrancheVaultTest is Test {
 
         vm.warp(uint256(_deadline(id)) + 1);
 
+        bytes memory hookData = abi.encodeCall(vault.clawback, (id));
         // Arm hook: re-enter clawback during safeTransfer to refundTo
-        mal.setHook(address(vault), abi.encodeCall(vault.clawback, (id)));
+        mal.setHook(address(vault), hookData);
 
+        // (a) Exact selector; (b) re-entry attempt was made
+        vm.expectCall(address(vault), hookData);
         vm.expectRevert(REENTRANT_SEL);
         vault.clawback(id);
 
-        assertEq(uint8(_status(id)) , uint8(ITrancheVault.Status.Active));
+        assertEq(uint8(_status(id)), uint8(ITrancheVault.Status.Active));
         assertEq(mal.balanceOf(address(vault)), AMOUNT);
     }
 
@@ -855,14 +873,17 @@ contract TrancheVaultTest is Test {
         vm.prank(funder);
         uint256 id = vault.createTranche(address(mal), recipient, AMOUNT, target, expectedCodeHash, _defaultDeadline());
 
+        bytes memory hookData = abi.encodeCall(vault.decline, (id));
         // Arm hook: re-enter decline during safeTransfer to refundTo
-        mal.setHook(address(vault), abi.encodeCall(vault.decline, (id)));
+        mal.setHook(address(vault), hookData);
 
+        // (a) Exact selector; (b) re-entry attempt was made
+        vm.expectCall(address(vault), hookData);
         vm.expectRevert(REENTRANT_SEL);
         vm.prank(recipient);
         vault.decline(id);
 
-        assertEq(uint8(_status(id)) , uint8(ITrancheVault.Status.Active));
+        assertEq(uint8(_status(id)), uint8(ITrancheVault.Status.Active));
         assertEq(mal.balanceOf(address(vault)), AMOUNT);
     }
 

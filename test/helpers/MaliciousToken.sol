@@ -28,6 +28,9 @@ contract MaliciousToken is ERC20 {
     /// @notice Calldata the hook will forward.
     bytes public hookCalldata;
 
+    /// @notice How many times the hook has fired (incremented before the call).
+    uint256 public attemptCount;
+
     // ─────────────────────────────────────────────────────────────────────────
     // Constructor
     // ─────────────────────────────────────────────────────────────────────────
@@ -54,6 +57,7 @@ contract MaliciousToken is ERC20 {
         hookTarget = target;
         hookCalldata = data;
         hookActive = true;
+        attemptCount = 0; // reset each time the hook is armed
     }
 
     /// @notice Disable the hook.
@@ -72,6 +76,7 @@ contract MaliciousToken is ERC20 {
     ///      that error is re-raised here, and the outer vault call also reverts.
     function _update(address from, address to, uint256 value) internal override {
         if (hookActive && from != address(0)) {
+            attemptCount++; // record that the hook fired
             (bool _ok, bytes memory _ret) =
                 hookTarget.call(hookCalldata); // solhint-disable-line avoid-low-level-calls
             if (!_ok) {
