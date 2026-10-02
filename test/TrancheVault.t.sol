@@ -314,6 +314,15 @@ contract TrancheVaultTest is Test {
         assertEq(vault.totalAllocated(address(token)), 0);
     }
 
+    function test_event_TrancheClaimed() public {
+        (uint256 id, bytes32 salt) = _defaultSetup();
+        _deploy(salt);
+
+        vm.expectEmit(true, true, true, true, address(vault));
+        emit ITrancheVault.TrancheClaimed(id, recipient, AMOUNT);
+        vault.claim(id);
+    }
+
     function test_claim_success_thirdParty() public {
         (uint256 id, bytes32 salt) = _defaultSetup();
         _deploy(salt);
@@ -434,6 +443,15 @@ contract TrancheVaultTest is Test {
         assertEq(token.balanceOf(funder), funBefore + AMOUNT);
     }
 
+    function test_event_TrancheClawedBack() public {
+        (uint256 id,) = _defaultSetup();
+        vm.warp(uint256(_deadline(id)) + 1);
+
+        vm.expectEmit(true, true, true, true, address(vault));
+        emit ITrancheVault.TrancheClawedBack(id, funder, AMOUNT);
+        vault.clawback(id);
+    }
+
     function test_clawback_revert_secondCall_notActive() public {
         (uint256 id,) = _defaultSetup();
         vm.warp(uint256(_deadline(id)) + 1);
@@ -474,6 +492,15 @@ contract TrancheVaultTest is Test {
         assertEq(token.balanceOf(funder), funBefore + AMOUNT);
         assertEq(uint8(_status(id)) , uint8(ITrancheVault.Status.Declined));
         assertEq(vault.totalAllocated(address(token)), 0);
+    }
+
+    function test_event_TrancheDeclined() public {
+        (uint256 id,) = _defaultSetup();
+
+        vm.expectEmit(true, true, true, true, address(vault));
+        emit ITrancheVault.TrancheDeclined(id, funder, AMOUNT);
+        vm.prank(recipient);
+        vault.decline(id);
     }
 
     function test_decline_success_afterDeadline() public {
@@ -748,6 +775,13 @@ contract TrancheVaultTest is Test {
     function test_isClawbackable_falseAfterClaimed() public {
         (uint256 id, bytes32 salt) = _defaultSetup();
         _deploy(salt); vault.claim(id);
+        assertFalse(vault.isClawbackable(id));
+    }
+
+    function test_isClawbackable_falseAfterDeclined() public {
+        (uint256 id,) = _defaultSetup();
+        vm.prank(recipient);
+        vault.decline(id);
         assertFalse(vault.isClawbackable(id));
     }
 
