@@ -1,0 +1,18 @@
+{
+  "chainId": 421614,
+  "chainName": "arbitrum-sepolia",
+  "deployer": "0x4191ee0d12f78211826572a1cb71b646f94d9a14",
+  "contracts": {
+    "TrancheVault": {
+      "address": "0x6060a9dcefb34bec82a9a95fdd97987e6215d352",
+      "txHash": "0x7ce3ac5c05f18dad7527b3cfbec85fea3456080e376cc0a8d285555e129c12eb",
+      "blockNumber": 314957661
+    },
+    "USDG": {
+      "address": "0xbe5a8c180712be720bc8f1da3c1cff2b85effaa9",
+      "txHash": "0xd9084c9c3d24476d248141e8c2829a951e82ec3d4168960ec0957c53051fe7dd",
+      "blockNumber": 314957675,
+      "isMock": true
+    }
+  }
+}
