@@ -109,7 +109,7 @@ Our difference is narrow: a minimal, immutable vault whose only trigger is chain
 
 ## Why Arbitrum and Robinhood Chain
 
-Every demo flow costs a tiny fraction of a cent in gas on both chains, which is what makes automated, per-milestone payouts practical. Robinhood Chain is an Arbitrum Orbit chain, and the same contract and script deploy to both unchanged.
+At current ETH prices (about $2,750), a claim costs roughly a quarter of a cent on Robinhood Chain Testnet and about a cent on Arbitrum Sepolia (testnet gas is free; these are equivalent costs), which keeps per-milestone payouts practical. Robinhood Chain is an Arbitrum Orbit chain, and the same contract and script deploy to both unchanged.
 
 ## Progress during the hackathon
 
