@@ -72,3 +72,13 @@ forge test -vvv
 # Run stateful fuzz invariant suite
 forge test --match-test invariant -vvv
 ```
+
+## Links
+
+- **Integration Guide & Demo Recipe**: [`docs/INTEGRATION.md`](file:///c:/Users/steph/Desktop/Git/Tranche/docs/INTEGRATION.md)
+- **Live Demo Proof (Robinhood Testnet `46630`)**: [`demo/demo-46630.md`](file:///c:/Users/steph/Desktop/Git/Tranche/demo/demo-46630.md)
+- **Live Demo Proof (Arbitrum Sepolia `421614`)**: [`demo/demo-421614.md`](file:///c:/Users/steph/Desktop/Git/Tranche/demo/demo-421614.md)
+- **Live Demo Flow Script**: [`script/DemoFlow.s.sol`](file:///c:/Users/steph/Desktop/Git/Tranche/script/DemoFlow.s.sol)
+- **Demo Deliverable Helper**: [`script/helpers/DemoDeliverable.sol`](file:///c:/Users/steph/Desktop/Git/Tranche/script/helpers/DemoDeliverable.sol)
+- **Robinhood Testnet Manifest**: [`deployments/46630.json`](file:///c:/Users/steph/Desktop/Git/Tranche/deployments/46630.json)
+- **Arbitrum Sepolia Manifest**: [`deployments/421614.json`](file:///c:/Users/steph/Desktop/Git/Tranche/deployments/421614.json)

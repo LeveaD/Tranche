@@ -243,3 +243,45 @@ event RefundToUpdated(
     address indexed newRefundTo
 );
 ```
+
+---
+
+## 8. Demo Recipe
+
+A complete end-to-end demonstration flow is implemented in [`script/DemoFlow.s.sol`](file:///c:/Users/steph/Desktop/Git/Tranche/script/DemoFlow.s.sol) and [`script/helpers/DemoDeliverable.sol`](file:///c:/Users/steph/Desktop/Git/Tranche/script/helpers/DemoDeliverable.sol).
+
+The demo dynamically reads the vault and token contracts from `deployments/<chainId>.json` and contains three entry points:
+
+### 8.1 Happy Path Flow: `run()`
+Mints 100 MockUSDG (if mock token), approves TrancheVault, computes target deploy address from explicit transaction nonce, creates a tranche with `deadline = block.timestamp + 1 hours`, deploys `DemoDeliverable`, verifies `address(deployed) == target`, and claims the locked funds.
+
+```bash
+# Robinhood Testnet (Chain ID 46630)
+forge script script/DemoFlow.s.sol:DemoFlow --rpc-url https://rpc.testnet.chain.robinhood.com --broadcast
+
+# Arbitrum Sepolia (Chain ID 421614)
+forge script script/DemoFlow.s.sol:DemoFlow --rpc-url https://sepolia-rollup.arbitrum.io/rpc --broadcast
+```
+
+### 8.2 Expiring Tranche Creation: `createExpiring()`
+Mints 100 MockUSDG (if mock token), approves TrancheVault, and creates an escrow tranche with a short deadline of `block.timestamp + 180 seconds` (3 minutes). No contract is deployed to the target address, leaving the tranche unclaimed.
+
+```bash
+# Robinhood Testnet (Chain ID 46630)
+forge script script/DemoFlow.s.sol:DemoFlow --sig "createExpiring()" --rpc-url https://rpc.testnet.chain.robinhood.com --broadcast
+
+# Arbitrum Sepolia (Chain ID 421614)
+forge script script/DemoFlow.s.sol:DemoFlow --sig "createExpiring()" --rpc-url https://sepolia-rollup.arbitrum.io/rpc --broadcast
+```
+
+### 8.3 Clawback Expired Tranche: `clawbackExpired()`
+After the 180-second deadline has elapsed, anyone can call `clawback(id)` to return the 100 USDG back to the funder's `refundTo` address. Specify the target tranche ID using the `DEMO_ID` environment variable:
+
+```bash
+# Robinhood Testnet (Chain ID 46630)
+DEMO_ID=<trancheId> forge script script/DemoFlow.s.sol:DemoFlow --sig "clawbackExpired()" --rpc-url https://rpc.testnet.chain.robinhood.com --broadcast
+
+# Arbitrum Sepolia (Chain ID 421614)
+DEMO_ID=<trancheId> forge script script/DemoFlow.s.sol:DemoFlow --sig "clawbackExpired()" --rpc-url https://sepolia-rollup.arbitrum.io/rpc --broadcast
+```
+

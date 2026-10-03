@@ -14,6 +14,10 @@ remappings = [
     "forge-std/=lib/forge-std/src/"
 ]
 
+fs_permissions = [
+    { access = "read", path = "./deployments" }
+]
+
 [invariant]
 runs = 256
 depth = 64
