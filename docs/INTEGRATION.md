@@ -8,9 +8,9 @@ This document describes how front-end applications and offchain agents integrate
 
 Do **not** hardcode contract addresses into application source code. Dynamic addresses and chain configurations should be loaded directly from the respective deployment manifests:
 
-- **Robinhood Testnet (Chain ID `46630`)**: [`deployments/46630.json`](file:///c:/Users/steph/Desktop/Git/Tranche/deployments/46630.json)
-- **Arbitrum Sepolia (Chain ID `421614`)**: [`deployments/421614.json`](file:///c:/Users/steph/Desktop/Git/Tranche/deployments/421614.json)
-- **Contract ABI**: [`abi/TrancheVault.json`](file:///c:/Users/steph/Desktop/Git/Tranche/abi/TrancheVault.json)
+- **Robinhood Testnet (Chain ID `46630`)**: [`deployments/46630.json`](../deployments/46630.json)
+- **Arbitrum Sepolia (Chain ID `421614`)**: [`deployments/421614.json`](../deployments/421614.json)
+- **Contract ABI**: [`abi/TrancheVault.json`](../abi/TrancheVault.json)
 
 > **Important**: The `token` passed to `createTranche` must be a supported ERC-20 token address defined in the target chain's deployment file (`deployments/<chainId>.json`). Fee-on-transfer and rebasing tokens are explicitly not supported and will revert.
 
@@ -157,7 +157,7 @@ Returns `false` otherwise (never reverts, even for invalid IDs).
 
 ## 6. Custom Errors
 
-All custom errors declared in [`ITrancheVault.sol`](file:///c:/Users/steph/Desktop/Git/Tranche/src/interfaces/ITrancheVault.sol):
+All custom errors declared in [`ITrancheVault.sol`](../src/interfaces/ITrancheVault.sol):
 
 | Custom Error | Selector | Description |
 |---|---|---|
@@ -179,7 +179,7 @@ All custom errors declared in [`ITrancheVault.sol`](file:///c:/Users/steph/Deskt
 
 ## 7. Events
 
-All events declared in [`ITrancheVault.sol`](file:///c:/Users/steph/Desktop/Git/Tranche/src/interfaces/ITrancheVault.sol):
+All events declared in [`ITrancheVault.sol`](../src/interfaces/ITrancheVault.sol):
 
 ### `TrancheCreated`
 Emitted upon creation. Contains all parameters necessary to reconstruct contract state offchain.
@@ -248,7 +248,7 @@ event RefundToUpdated(
 
 ## 8. Demo Recipe
 
-A complete end-to-end demonstration flow is implemented in [`script/DemoFlow.s.sol`](file:///c:/Users/steph/Desktop/Git/Tranche/script/DemoFlow.s.sol) and [`script/helpers/DemoDeliverable.sol`](file:///c:/Users/steph/Desktop/Git/Tranche/script/helpers/DemoDeliverable.sol).
+A complete end-to-end demonstration flow is implemented in [`script/DemoFlow.s.sol`](../script/DemoFlow.s.sol) and [`script/helpers/DemoDeliverable.sol`](../script/helpers/DemoDeliverable.sol).
 
 The demo dynamically reads the vault and token contracts from `deployments/<chainId>.json` and contains three entry points:
 

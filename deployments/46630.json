@@ -6,12 +6,12 @@
     "TrancheVault": {
       "address": "0x6060a9dcefb34bec82a9a95fdd97987e6215d352",
       "txHash": "0x692fea594f7762c0721bc37f273b40b9932590292a09eb8e1857c456c28afb11",
-      "blockNumber": 127531916
+      "blockNumber": 127529868
     },
     "USDG": {
       "address": "0xbe5a8c180712be720bc8f1da3c1cff2b85effaa9",
       "txHash": "0x125c8705d8757c51b752ecb38335e1f34f4848fd98729582019587f56c0f3629",
-      "blockNumber": 127531936,
+      "blockNumber": 127529888,
       "isMock": true
     }
   }
