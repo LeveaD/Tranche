@@ -8,6 +8,8 @@ broadcast/
 
 # Node
 node_modules/
+web/node_modules/
+web/dist/
 
 # IDE
 .vscode/

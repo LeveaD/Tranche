@@ -118,7 +118,7 @@ At current ETH prices (about $2,750), a claim costs roughly a quarter of a cent 
 - Implementation: core vault, interface, tests, invariants, deploy and demo scripts, committed in phases (see `git log`).
 - Deployed and verified on two testnets; live demo transactions listed above.
 - **AI assistance disclosure:** AI coding assistants were used to write and review code. We specified the design, checked every phase against it, and verified the result with tests, mutation checks and live transactions.
-- UI: [CONFIRM: link or "in progress"].
+- UI: Monolith Brutalist Web Application located in [`web/`](web/) (`npm run dev`). Full integration with Arbitrum Sepolia (`421614`) and Robinhood Chain Testnet (`46630`).
 
 ## Roadmap
 
@@ -131,6 +131,7 @@ At current ETH prices (about $2,750), a claim costs roughly a quarter of a cent 
 
 ```
 src/             TrancheVault.sol, interface, MockUSDG
+web/             Monolith Brutalist web UI (Vite + Vanilla JS + Ethers)
 test/            unit, fuzz and invariant tests, helpers
 script/          deploy and demo scripts
 abi/             exported ABI

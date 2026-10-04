@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="monolith">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRANCHE — Deterministic Milestone Escrow Protocol</title>
+  <meta name="description" content="Immutable escrow vault for deterministic milestone payouts on onchain deployments. No oracles, reviewers, admin keys, or fees." />
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div class="monolith-shell">
+
+    <!-- MASTHEAD -->
+    <header class="m-masthead">
+      <div class="m-masthead__meta">
+        <div class="text-micro">
+          TRANCHE VAULT ESCROW — TESTNET RELEASE v1.0.0 — OCTOBER 2026
+        </div>
+        <div class="m-masthead__controls">
+          <!-- Network Selector -->
+          <label for="select-network" style="margin: 0; display: inline; font-size: 0.75rem;">NETWORK:</label>
+          <select id="select-network" class="m-input" style="width: auto; padding: 0.2rem 0.5rem; font-size: 0.8rem;">
+            <option value="421614" selected>ARBITRUM SEPOLIA (421614)</option>
+            <option value="46630">ROBINHOOD TESTNET (46630)</option>
+          </select>
+
+          <!-- Theme Toggle -->
+          <button id="btn-toggle-theme" class="m-button m-button-sm">[THEME: MONOLITH]</button>
+
+          <!-- Connect Wallet Button -->
+          <button id="btn-connect-wallet" class="m-button m-button-sm m-button-primary">[CONNECT WALLET]</button>
+        </div>
+      </div>
+
+      <!-- Monumental Title -->
+      <h1 class="text-monolith">TRANCHE</h1>
+
+      <div class="rule rule--monolith"></div>
+
+      <!-- Masthead Mono Metadata Line -->
+      <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.82rem; text-transform: uppercase;">
+        <div>VAULT: <code id="meta-vault-addr">0x6060A9dCeFB34bEc82A9a95FDd97987e6215D352</code></div>
+        <div>BLOCK: <span id="meta-block-num" style="font-weight: 700;">CONNECTING...</span></div>
+        <div>USDG BAL: <span id="meta-user-usdg" style="font-weight: 700;">0.00</span></div>
+        <div>WALLET: <span id="meta-wallet-status" style="font-weight: 700;">READ-ONLY RPC ACTIVE</span></div>
+      </div>
+    </header>
+
+    <!-- MARQUEE TICKER -->
+    <div class="m-marquee" style="margin-top: 1rem;">
+      <div class="m-marquee__track" id="marquee-content">
+        TRANCHE PROTOCOL ESCROW // DETERMINISTIC ONCHAIN CODE-HASH PAYOUTS // ZERO ORACLES // ZERO ADMIN KEYS // IMMUTABLE VAULT // ARBITRUM SEPOLIA (315.7M BLOCKS) // ROBINHOOD ORBIT TESTNET (128.7M BLOCKS) // USDG 6-DECIMAL SETTLEMENT // CODEHASH EXTCODEHASH RUNTIME VERIFICATION //
+      </div>
+    </div>
+
+    <!-- ONE FEATURED BLOCK PER PAGE (STYLEGUIDE § 4.4 & § 6.5) -->
+    <section style="margin: 1.5rem 0;">
+      <div class="m-feature">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div class="text-micro" style="color: var(--accent-ink); margin-bottom: 0.25rem;">
+              [CORE INVARIANT & ZERO-TRUST DESIGN]
+            </div>
+            <h2 class="text-title" style="font-size: 1.85rem; color: var(--accent-ink); line-height: 1.05;">
+              CONTRACT CODE IS THE ONLY TRIGGER. NO DISPUTE COMMITTEES.
+            </h2>
+            <p class="text-body" style="font-size: 0.95rem; color: var(--accent-ink); margin-top: 0.5rem; max-width: 75ch;">
+              If the exact committed bytecode appears at the pre-agreed address before the deadline, recipient is paid. If the deadline passes without deployment, funder gets 100% refund. Anyone can trigger claim or clawback.
+            </p>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <button class="m-button" id="btn-feature-create" style="background: var(--ink); color: var(--paper);">[CREATE TRANCHE →]</button>
+            <button class="m-button" id="btn-feature-audit" style="background: transparent; color: var(--ink); border-color: var(--ink);">[READ SPEC →]</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INDEX NAVIGATION -->
+    <nav class="m-index-nav" id="main-nav">
+      <a class="m-index-nav__item active" data-tab="tab-ledger">01 ESCROW LEDGER</a>
+      <a class="m-index-nav__item" data-tab="tab-create">02 CREATE TRANCHE</a>
+      <a class="m-index-nav__item" data-tab="tab-actions">03 CLAIM & SETTLEMENT</a>
+      <a class="m-index-nav__item" data-tab="tab-hasher">04 BYTECODE TOOL</a>
+      <a class="m-index-nav__item" data-tab="tab-spec">05 PROTOCOL & DEMO SPEC</a>
+      <a class="m-index-nav__item" data-tab="tab-faucet">06 FAUCET & MOCKUSDG</a>
+    </nav>
+
+    <!-- MAIN BODY CONTENT -->
+    <main>
+
+      <!-- TAB 1: ESCROW LEDGER -->
+      <section id="tab-ledger" class="tab-content active">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <h2 class="text-heading" style="font-size: 1.5rem;">ESCROW TRANCHE ARCHIVE</h2>
+            <p class="text-body" style="font-size: 0.95rem;">
+              Full table of active, claimed, and clawed-back tranches queried live from the onchain vault contract.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <button class="m-button m-button-sm btn-filter active" data-status="ALL">[ALL]</button>
+            <button class="m-button m-button-sm btn-filter" data-status="1">[ACTIVE]</button>
+            <button class="m-button m-button-sm btn-filter" data-status="2">[CLAIMED]</button>
+            <button class="m-button m-button-sm btn-filter" data-status="3">[CLAWEDBACK]</button>
+            <button class="m-button m-button-sm btn-filter" data-status="4">[DECLINED]</button>
+            <button class="m-button m-button-sm" id="btn-refresh-ledger">[↻ REFRESH ONCHAIN]</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <input type="text" id="input-search-ledger" class="m-input" placeholder="Filter by ID, Recipient, Funder, or Target Address..." />
+        </div>
+
+        <!-- Ledger Archive Table -->
+        <div id="ledger-table-container"></div>
+      </section>
+
+      <!-- TAB 2: CREATE TRANCHE -->
+      <section id="tab-create" class="tab-content">
+        <div class="m-asymmetric-grid">
+          <!-- Narrow Left Rail: Metadata & Rules -->
+          <aside class="m-rail">
+            <div class="m-rail__item">
+              <div class="m-rail__label">CREATION PHASE</div>
+              <div class="m-rail__val">FUNDER LOCKS ESCROW</div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">SETTLEMENT TOKEN</div>
+              <div class="m-rail__val">USDG (6 DECIMALS)</div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">PRE-FLIGHT VALIDATION</div>
+              <div class="m-rail__val">
+                • Target must have NO code<br>
+                • Hash != 0 & != keccak("")<br>
+                • Deadline strictly future<br>
+                • Fee-on-transfer rejected
+              </div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">ALLOWANCE REQUIRED</div>
+              <div class="m-rail__val" id="rail-allowance-status">0.00 USDG</div>
+            </div>
+          </aside>
+
+          <!-- Wide Right: Form -->
+          <div>
+            <h2 class="text-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">CREATE NEW ESCROW TRANCHE</h2>
+            <p class="text-body" style="margin-bottom: 1.5rem;">
+              Deposit USDG into an immutable vault. The funds will be released to the recipient upon proof of exact contract deployment at the pre-agreed target address.
+            </p>
+
+            <form id="create-tranche-form">
+              <div class="m-form-grid" style="margin-bottom: 1rem;">
+                <div>
+                  <label for="input-token-address">ERC-20 Settlement Token (USDG) <span class="m-tag m-tag--accent">[6 DECIMALS]</span></label>
+                  <input type="text" id="input-token-address" class="m-input" required />
+                </div>
+                <div>
+                  <label for="input-recipient-address">Recipient Address (Beneficiary)</label>
+                  <input type="text" id="input-recipient-address" class="m-input" placeholder="0x... recipient address" required />
+                </div>
+              </div>
+
+              <div class="m-form-grid" style="margin-bottom: 1rem;">
+                <div>
+                  <label for="input-amount">Amount in USDG (e.g. 100.00)</label>
+                  <input type="number" id="input-amount" class="m-input" step="0.000001" min="0.000001" placeholder="100.00" value="100.00" required />
+                  <div class="text-micro" style="margin-top: 4px;">6 decimals precision ($1.00 = 1,000,000 units)</div>
+                </div>
+                <div>
+                  <label for="input-target-address">Target Deployment Address (Pre-committed)</label>
+                  <input type="text" id="input-target-address" class="m-input" placeholder="0x... target contract address" required />
+                  <div id="target-check-notice"></div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                  <label for="input-expected-hash" style="margin: 0;">Expected Runtime Bytecode Hash (bytes32 keccak256)</label>
+                  <button type="button" id="btn-fill-demo-hash" class="m-button-text">[AUTO-FILL DEMO DELIVERABLE HASH]</button>
+                </div>
+                <input type="text" id="input-expected-hash" class="m-input" placeholder="0x... 32-byte hex hash" required />
+                <div id="hash-check-notice"></div>
+              </div>
+
+              <div style="margin-bottom: 1.5rem;">
+                <label for="input-deadline">Absolute Unix Deadline</label>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                  <input type="datetime-local" id="input-deadline" class="m-input" style="max-width: 320px;" required />
+                  <button type="button" class="m-button m-button-sm btn-deadline-preset" data-seconds="180">[+3 MIN (EXPIRING DEMO)]</button>
+                  <button type="button" class="m-button m-button-sm btn-deadline-preset" data-seconds="3600">[+1 HOUR (HAPPY PATH)]</button>
+                  <button type="button" class="m-button m-button-sm btn-deadline-preset" data-seconds="86400">[+24 HOURS]</button>
+                  <button type="button" class="m-button m-button-sm btn-deadline-preset" data-seconds="604800">[+7 DAYS]</button>
+                </div>
+                <div id="deadline-preview" class="text-micro"></div>
+              </div>
+
+              <div id="create-notice-box" style="margin-bottom: 1.25rem; display: none;"></div>
+
+              <div style="display: flex; gap: 1rem; align-items: center;">
+                <button type="submit" id="btn-submit-create" class="m-button m-button-primary">
+                  [STEP 1: APPROVE USDG VAULT ALLOWANCE]
+                </button>
+                <button type="reset" class="m-button">[RESET FORM]</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: CLAIM & SETTLEMENT -->
+      <section id="tab-actions" class="tab-content">
+        <h2 class="text-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">TRANCHE INSPECTOR & SETTLEMENT CONSOLE</h2>
+        <p class="text-body" style="margin-bottom: 1.5rem;">
+          Query any tranche by ID to verify deployed runtime bytecode onchain, inspect claim/clawback eligibility, or execute settlement.
+        </p>
+
+        <div class="m-box" style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+          <label for="input-lookup-id" style="margin: 0; font-size: 0.9rem;">TRANCHE ID:</label>
+          <input type="number" id="input-lookup-id" class="m-input" style="max-width: 140px;" placeholder="e.g. 1" min="1" value="1" />
+          <button id="btn-lookup-tranche" class="m-button m-button-primary">[INSPECT ONCHAIN]</button>
+          <div class="text-micro" style="margin-left: auto;">
+            CALLABLE BY ANYONE (PERMISSIONLESS SETTLEMENT)
+          </div>
+        </div>
+
+        <div id="inspect-result-container">
+          <div class="m-box">
+            <p class="text-body">Enter a Tranche ID above or click [INSPECT] from the Escrow Ledger to view onchain details.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: BYTECODE HASHER TOOL -->
+      <section id="tab-hasher" class="tab-content">
+        <div class="m-asymmetric-grid">
+          <aside class="m-rail">
+            <div class="m-rail__item">
+              <div class="m-rail__label">TOOL PURPOSE</div>
+              <div class="m-rail__val">DRY-RUN CODEHASH CALCULATION</div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">COMPILER GUIDELINE</div>
+              <div class="m-rail__val">
+                Build deliverables with:<br>
+                <code>bytecode_hash = "none"</code><br>
+                <code>cbor_metadata = false</code>
+              </div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">HASH FUNCTION</div>
+              <div class="m-rail__val">keccak256(runtimeBytecode)</div>
+            </div>
+          </aside>
+
+          <div>
+            <h2 class="text-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">BYTECODE HASHER & ADDRESS PREDICTOR</h2>
+            <p class="text-body" style="margin-bottom: 1.5rem;">
+              Calculate the expected runtime bytecode hash and predict the contract deployment address before creating an escrow tranche.
+            </p>
+
+            <!-- Tool 1: Runtime Hasher -->
+            <div class="m-box" style="margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 class="text-heading">1. RUNTIME BYTECODE HASHER</h3>
+                <button id="btn-load-sample-bytecode" class="m-button-text">[LOAD DEMO DELIVERABLE BYTECODE]</button>
+              </div>
+              <label for="input-raw-bytecode">Paste Runtime Bytecode Hex (with or without 0x)</label>
+              <textarea id="input-raw-bytecode" class="m-input" rows="4" placeholder="0x608060405234..."></textarea>
+              <div style="margin-top: 0.75rem;">
+                <button id="btn-compute-hash" class="m-button m-button-primary">[COMPUTE KECCAK256 HASH]</button>
+              </div>
+              <div id="hasher-result-box" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Tool 2: CREATE Address Calculator -->
+            <div class="m-box" style="margin-bottom: 1.5rem;">
+              <h3 class="text-heading" style="margin-bottom: 0.5rem;">2. TARGET ADDRESS CALCULATOR (CREATE)</h3>
+              <p class="text-body" style="font-size: 0.85rem; margin-bottom: 1rem;">
+                Computes the deterministic deployment address for standard transactions given the deployer address and expected transaction nonce.
+              </p>
+              <div class="m-form-grid">
+                <div>
+                  <label for="input-create-deployer">Deployer Wallet Address</label>
+                  <input type="text" id="input-create-deployer" class="m-input" placeholder="0x..." />
+                </div>
+                <div>
+                  <label for="input-create-nonce">Transaction Nonce (e.g. 0, 1, 2...)</label>
+                  <input type="number" id="input-create-nonce" class="m-input" placeholder="0" min="0" value="0" />
+                </div>
+              </div>
+              <div style="margin-top: 0.75rem;">
+                <button id="btn-calc-create-addr" class="m-button">[CALCULATE TARGET ADDRESS]</button>
+              </div>
+              <div id="create-calc-result" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Tool 3: Live Address Inspector -->
+            <div class="m-box">
+              <h3 class="text-heading" style="margin-bottom: 0.5rem;">3. LIVE ONCHAIN BYTECODE INSPECTOR</h3>
+              <p class="text-body" style="font-size: 0.85rem; margin-bottom: 1rem;">
+                Fetch the live runtime bytecode and compute the current code hash of any address on the active testnet.
+              </p>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="input-inspect-address" class="m-input" placeholder="0x... contract address" />
+                <button id="btn-inspect-address-code" class="m-button m-button-primary" style="white-space: nowrap;">[INSPECT CODE]</button>
+              </div>
+              <div id="inspect-code-result" style="margin-top: 1rem;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: PROTOCOL SPEC & DEMO AUDIT -->
+      <section id="tab-spec" class="tab-content">
+        <div class="m-asymmetric-grid">
+          <!-- Left Rail -->
+          <aside class="m-rail">
+            <div class="m-rail__item">
+              <div class="m-rail__label">PROTOCOL</div>
+              <div class="m-rail__val">TRANCHE ESCROW VAULT</div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">LICENSE</div>
+              <div class="m-rail__val">MIT LICENSE</div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">TEST SUITE</div>
+              <div class="m-rail__val">80 UNIT & FUZZ TESTS<br>4 STATEFUL INVARIANTS<br>100% BRANCH COVERAGE</div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">MUTATION CHECKS</div>
+              <div class="m-rail__val">24 DELIBERATE FAULTS<br>100% CAUGHT BY TESTS</div>
+            </div>
+          </aside>
+
+          <!-- Right Content: Article Style -->
+          <div>
+            <h2 class="text-title" style="font-size: 2.25rem; margin-bottom: 0.5rem;">PROTOCOL SPECIFICATION & TESTNET PROOFS</h2>
+            <p class="text-micro" style="margin-bottom: 1.5rem;">BY TRANCHE CORE CONTRIBUTORS — OCTOBER 2026</p>
+
+            <blockquote style="margin: 1.5rem 0;">
+              "One class of milestone does not need human reviewers, multisigs, or oracles: 'this exact contract is live at this address.' The chain can check that by itself."
+            </blockquote>
+
+            <h3 class="text-heading" style="margin-top: 2rem; margin-bottom: 0.5rem;">1. TEMPORAL BOUNDARY SEMANTICS</h3>
+            <p class="text-body" style="margin-bottom: 1rem;">
+              The protocol enforces strict, mutually exclusive boundaries between claim and clawback:
+            </p>
+
+            <div class="m-table-wrap">
+              <table class="m-table">
+                <thead>
+                  <tr>
+                    <th>CONDITION</th>
+                    <th>claim(id)</th>
+                    <th>clawback(id)</th>
+                    <th>GOVERNING RULE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>block.timestamp &lt; deadline</code></td>
+                    <td><strong>ALLOWED</strong> (if codehash matches)</td>
+                    <td><strong>REVERTS</strong> (<code>DeadlineNotPassed</code>)</td>
+                    <td>Deliverable execution window</td>
+                  </tr>
+                  <tr>
+                    <td><code>block.timestamp == deadline</code></td>
+                    <td><strong>ALLOWED</strong> (boundary second)</td>
+                    <td><strong>REVERTS</strong> (<code>DeadlineNotPassed</code>)</td>
+                    <td>Exact second favors claim</td>
+                  </tr>
+                  <tr>
+                    <td><code>block.timestamp &gt; deadline</code></td>
+                    <td><strong>REVERTS</strong> (<code>DeadlinePassed</code>)</td>
+                    <td><strong>ALLOWED</strong></td>
+                    <td>Guaranteed refund window</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="rule rule--heavy"></div>
+
+            <h3 class="text-heading" style="margin-top: 2rem; margin-bottom: 0.5rem;">2. LIVE TESTNET DEMONSTRATION PROOFS</h3>
+            <p class="text-body" style="margin-bottom: 1rem;">
+              Verified onchain transactions executed on Robinhood Testnet (Chain ID 46630) and Arbitrum Sepolia (Chain ID 421614):
+            </p>
+
+            <div class="m-table-wrap">
+              <table class="m-table">
+                <thead>
+                  <tr>
+                    <th>CHAIN</th>
+                    <th>ACTION</th>
+                    <th>TRANCHE</th>
+                    <th>TX HASH & PROOF</th>
+                    <th>BLOCK</th>
+                    <th>OUTCOME</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Robinhood (46630)</td>
+                    <td><code>createTranche</code></td>
+                    <td>#3</td>
+                    <td><a href="https://explorer.testnet.chain.robinhood.com/tx/0x06b7705b4343e2bcd176b9d38f152bf74316d40422d269b9e6a1d4d83c879095" target="_blank" rel="noopener">0x06b7705b…9095</a></td>
+                    <td>128212526</td>
+                    <td>Locked 100 USDG</td>
+                  </tr>
+                  <tr>
+                    <td>Robinhood (46630)</td>
+                    <td><code>claim</code></td>
+                    <td>#3</td>
+                    <td><a href="https://explorer.testnet.chain.robinhood.com/tx/0x91d76d4ccd99f84c14cff767e0274d19577cea171dc072e4cca2069f3429f22e" target="_blank" rel="noopener">0x91d76d4c…f22e</a></td>
+                    <td>128212574</td>
+                    <td>100 USDG paid to recipient</td>
+                  </tr>
+                  <tr>
+                    <td>Robinhood (46630)</td>
+                    <td><code>clawback</code></td>
+                    <td>#2</td>
+                    <td><a href="https://explorer.testnet.chain.robinhood.com/tx/0x81c00d7fdbd8a21f87089adcb4b65b0a4573916575c7a751f4a13a430e409513" target="_blank" rel="noopener">0x81c00d7f…9513</a></td>
+                    <td>128242697</td>
+                    <td>100 USDG refunded to funder</td>
+                  </tr>
+                  <tr>
+                    <td>Arbitrum Sepolia (421614)</td>
+                    <td><code>createTranche</code></td>
+                    <td>#2</td>
+                    <td><a href="https://sepolia.arbiscan.io/tx/0xfb8ac59960112aaf2cd01e7942f695fbe06e1335c71cec4c4b2a833928edfeae" target="_blank" rel="noopener">0xfb8ac599…feae</a></td>
+                    <td>315364494</td>
+                    <td>Locked 100 USDG</td>
+                  </tr>
+                  <tr>
+                    <td>Arbitrum Sepolia (421614)</td>
+                    <td><code>claim</code></td>
+                    <td>#2</td>
+                    <td><a href="https://sepolia.arbiscan.io/tx/0x16b6238e09dfe8a02f994c061ccea308d2e105898a0ae13ca7d2bb6a593b4223" target="_blank" rel="noopener">0x16b6238e…4223</a></td>
+                    <td>315364522</td>
+                    <td>100 USDG paid to recipient</td>
+                  </tr>
+                  <tr>
+                    <td>Arbitrum Sepolia (421614)</td>
+                    <td><code>clawback</code></td>
+                    <td>#1</td>
+                    <td><a href="https://sepolia.arbiscan.io/tx/0xd25d104553532218832c55a3add61b720fb1f6379614e05967d8225fb2a33de2" target="_blank" rel="noopener">0xd25d1045…3de2</a></td>
+                    <td>315364909</td>
+                    <td>100 USDG refunded to funder</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="rule rule--heavy"></div>
+
+            <h3 class="text-heading" style="margin-top: 2rem; margin-bottom: 0.5rem;">3. VAULT CUSTOM ERRORS SPECIFICATION</h3>
+            <p class="text-body" style="margin-bottom: 1rem;">
+              Defined in <code>ITrancheVault.sol</code> with 4-byte function selectors:
+            </p>
+
+            <div class="m-table-wrap">
+              <table class="m-table" id="table-custom-errors">
+                <thead>
+                  <tr>
+                    <th>SELECTOR</th>
+                    <th>ERROR NAME</th>
+                    <th>REVERT CONDITION</th>
+                  </tr>
+                </thead>
+                <tbody id="custom-errors-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: FAUCET & MOCKUSDG -->
+      <section id="tab-faucet" class="tab-content">
+        <div class="m-asymmetric-grid">
+          <aside class="m-rail">
+            <div class="m-rail__item">
+              <div class="m-rail__label">TOKEN TYPE</div>
+              <div class="m-rail__val">MOCK USDG (6 DECIMALS)</div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">STATUS</div>
+              <div class="m-rail__val">UNRESTRICTED TEST MINT</div>
+            </div>
+            <div class="rule rule--hair"></div>
+            <div class="m-rail__item">
+              <div class="m-rail__label">FUNCTION CALL</div>
+              <div class="m-rail__val">mint(address, uint256)</div>
+            </div>
+          </aside>
+
+          <div>
+            <h2 class="text-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">TESTNET MOCKUSDG FAUCET</h2>
+            <p class="text-body" style="margin-bottom: 1.5rem;">
+              Mint 6-decimal test tokens directly to your connected wallet to test creating and funding escrow tranches on Arbitrum Sepolia or Robinhood Testnet.
+            </p>
+
+            <div class="m-box m-box--heavy" style="max-width: 600px;">
+              <div style="margin-bottom: 1rem;">
+                <label>Recipient Address for Test Mint</label>
+                <input type="text" id="input-faucet-recipient" class="m-input" placeholder="0x... connected wallet" />
+              </div>
+              <div style="margin-bottom: 1.25rem;">
+                <label>Amount to Mint (USDG)</label>
+                <input type="number" id="input-faucet-amount" class="m-input" value="100.00" min="1" step="10" />
+                <div class="text-micro" style="margin-top: 4px;">Will call mint(address, 100,000,000) on MockUSDG contract.</div>
+              </div>
+
+              <div id="faucet-notice-box" style="margin-bottom: 1rem; display: none;"></div>
+
+              <button id="btn-execute-mint" class="m-button m-button-primary">
+                [MINT 100 USDG TESTNET TOKENS]
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- COLOPHON FOOTER (STYLEGUIDE § 6.7) -->
+    <footer class="m-colophon">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <strong style="font-size: 1rem;">TRANCHE ESCROW PROTOCOL</strong>
+          <div class="text-micro" style="color: var(--paper-tint); margin-top: 2px;">
+            DETERMINISTIC MILESTONE PAYOUTS FOR ONCHAIN DEPLOYMENTS
+          </div>
+        </div>
+        <div>
+          <span class="m-cursor">SYSTEM NORMAL · ALL INVARIANTS GREEN</span>
+        </div>
+      </div>
+
+      <div class="rule rule--hair" style="border-color: var(--paper-tint); margin: 1rem 0;"></div>
+
+      <div class="m-colophon__links">
+        <a href="https://github.com/leveaD/Tranche" target="_blank" rel="noopener">GITHUB REPO</a>
+        <a href="https://sepolia.arbiscan.io/address/0x6060a9dcefb34bec82a9a95fdd97987e6215d352" target="_blank" rel="noopener">ARB SCAN VAULT</a>
+        <a href="https://explorer.testnet.chain.robinhood.com/address/0x6060a9dcefb34bec82a9a95fdd97987e6215d352" target="_blank" rel="noopener">ROBINHOOD EXPLORER</a>
+        <a href="#" id="link-scroll-top">RETURN TO TOP ↑</a>
+      </div>
+
+      <div class="text-micro" style="color: var(--paper-tint); margin-top: 0.75rem;">
+        SET IN TIMES & COURIER. NO TRACKING. NO ANIMATIONS. VIEW SOURCE. TRANCHE VAULT ARCHIVE.
+      </div>
+    </footer>
+
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
